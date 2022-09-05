@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 -B simplemud.py
+python3 -B main.py --ws 9000
 
 # EOF
 
