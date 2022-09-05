@@ -12,7 +12,8 @@ async def test():
     async with websockets.connect(uri) as websocket:
         while True:
             incoming = await websocket.recv()
-            print("got: " + incoming)
+            incoming = incoming.strip()
+            print(incoming)
             msg = input(">")
             await websocket.send(msg)
 

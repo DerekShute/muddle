@@ -35,10 +35,11 @@ class Player():
 # Game World
 #
 class GameWorld():
-    def __init__(self, rooms, start_location):
-        self.start_location = start_location  # TODO must be in rooms
+    def __init__(self, config):
+        self.name = config['__name']
+        self.start_location = config['__start']
         self.players = {}
-        self.rooms = rooms
+        self.rooms = config   # TODO sections
 
     # ===== Player callbacks
 
@@ -47,8 +48,10 @@ class GameWorld():
         logging.info("%s joined.", pid)
         character = Player(self.start_location)  # TODO need world reference?
         self.players[pid] = character
-        character.message("Welcome to MUD")
-
+        room = self.rooms[character.location]
+        msg = f"""Welcome to {self.name}
+{room['description']}"""
+        character.message(msg)
         # TODO general announcement
 
     def on_disconnect(self, pid):
@@ -92,20 +95,23 @@ class GameWorld():
 # MAIN
 #
 
-rooms = {
-    "Tavern": {
+config = {
+    "__name": "Example",
+    "__start": "tavern",
+    "tavern": {
         "description": "You're in a cozy tavern warmed by an open fire.",
-        "exits": {"outside": "Outside"},
+        "exits": {"outside": "outside"},
     },
-    "Outside": {
+    "outside": {
         "description": "You're standing outside a tavern. It's raining.",
-        "exits": {"inside": "Tavern"},
+        "exits": {"inside": "tavern"},
     }
 }
 
 if __name__ == "__main__":
     # Setup the logger
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO,
                         handlers=[
                             logging.FileHandler("server.log"),
@@ -146,7 +152,7 @@ if __name__ == "__main__":
     if ws_port is not None:
         logging.info(f"Launching a WebSocket Server on port {ws_port}")
 
-    world = GameWorld(rooms, "Tavern")
+    world = GameWorld(config)
 
     try:
         server = MudServer(world, ws_port, tcp_port)
